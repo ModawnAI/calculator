@@ -20,6 +20,7 @@ import CalculateIcon from '@mui/icons-material/Calculate';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import PercentIcon from '@mui/icons-material/Percent'; // Added for rates
 import PieChartOutlineIcon from '@mui/icons-material/PieChartOutline'; // Added for pie chart section
+import { motion } from 'framer-motion'; // Import motion
 // --- Import Modular Results Components & Helpers ---
 import { KeyMetrics, DetailedTable, BarChartCard, PieChartCard } from './ResultsDisplay';
 import { formatCurrency, formatPercent } from './utils'; // Import helpers
@@ -331,34 +332,42 @@ function App() {
                     {/* Key Metrics Module */}
                     {results && (
                         <Grid item xs={12}>
-                           <KeyMetrics results={results} theme={theme} />
+                           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
+                               <KeyMetrics results={results} theme={theme} />
+                           </motion.div>
                         </Grid>
                     )}
 
                      {/* Detailed Table Module */}
                      {results && (
-                         <Grid item xs={12} lg={6}> {/* Equal width column */}
-                             <DetailedTable results={results} theme={theme} />
+                         <Grid item xs={12} md={6}> {/* Half width on medium+ */}
+                             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
+                                 <DetailedTable results={results} theme={theme} />
+                             </motion.div>
                          </Grid>
                      )}
 
                     {/* Charts Modules Area */}
                      {results && (
-                         <Grid item xs={12} lg={6}> {/* Equal width column */}
+                         <Grid item xs={12} md={6}> {/* Half width on medium+ */}
                              <Grid container spacing={3}>
                                  <Grid item xs={12}>
-                                     <BarChartCard
-                                         results={results}
-                                         barChartOptions={barChartOptions}
-                                         barChartData={barChartData}
-                                     />
+                                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.1 }}>
+                                         <BarChartCard
+                                             results={results}
+                                             barChartOptions={barChartOptions}
+                                             barChartData={barChartData}
+                                         />
+                                     </motion.div>
                                  </Grid>
                                  {pieChartData && (
                                      <Grid item xs={12}>
-                                         <PieChartCard
-                                             pieChartOptions={pieChartOptions}
-                                             pieChartData={pieChartData}
-                                         />
+                                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.2 }}>
+                                             <PieChartCard
+                                                 pieChartOptions={pieChartOptions}
+                                                 pieChartData={pieChartData}
+                                             />
+                                         </motion.div>
                                      </Grid>
                                  )}
                              </Grid>

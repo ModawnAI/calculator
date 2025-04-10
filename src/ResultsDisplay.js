@@ -1,5 +1,5 @@
 // src/ResultsDisplay.js
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Bar, Pie } from 'react-chartjs-2';
 import {
     // Note: Grid removed from KeyMetrics imports, Stack added
@@ -8,41 +8,99 @@ import {
 import SavingsIcon from '@mui/icons-material/Savings';
 import ShowChartIcon from '@mui/icons-material/ShowChart';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import PercentIcon from '@mui/icons-material/Percent';
 import PieChartOutlineIcon from '@mui/icons-material/PieChartOutline';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import DescriptionIcon from '@mui/icons-material/Description';
+import PercentIcon from '@mui/icons-material/Percent';
+import { motion, animate } from 'framer-motion';
 
 import { formatCurrency, formatPercent } from './utils'; // Import helpers
+
+// Helper component to animate numbers
+const AnimatedNumber = ({ value, formatter }) => {
+    const ref = useRef(null);
+    const previousValueRef = useRef(value); // Store previous value
+
+    useEffect(() => {
+        const node = ref.current;
+        const previousValue = previousValueRef.current;
+
+        const controls = animate(previousValue, value, {
+            duration: 0.5, // Animation duration
+            onUpdate(latest) {
+                if (node) {
+                    node.textContent = formatter(latest);
+                }
+            }
+        });
+        
+        // Update previous value for next render
+        previousValueRef.current = value;
+
+        // Cleanup animation on unmount or before next effect
+        return () => controls.stop(); 
+        
+    }, [value, formatter]); // Rerun effect if value or formatter changes
+
+    // Initial render with formatted value
+    return <span ref={ref}>{formatter(value)}</span>;
+};
 
 // --- Key Metrics Component (Using Stack) ---
 export const KeyMetrics = ({ results, theme }) => {
     if (!results) return null;
+
+    // Animation variants for the container
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: { staggerChildren: 0.1 } // Stagger children appearance
+        }
+    };
+
+    const itemVariants = {
+        hidden: { opacity: 0, y: 20 },
+        visible: { opacity: 1, y: 0 }
+    };
+
     return (
-        // Replaced Grid container with Stack
-        <Stack spacing={3}> {/* Adjust spacing as needed */}
-            {/* Item 1 */}
-            <Paper elevation={0} sx={{ p: 2, textAlign: 'center', border: `1px solid ${theme.palette.divider}` }}>
-                <SavingsIcon color="primary" sx={{ fontSize: 36, mb: 1 }} />
-                <Typography variant="h6" color="primary">{formatCurrency(results.taxSavings)}</Typography>
-                <Typography variant="body2" color="textSecondary">총 예상 절감 세액</Typography>
-            </Paper>
-
-            {/* Item 2 */}
-            <Paper elevation={0} sx={{ p: 2, textAlign: 'center', border: `1px solid ${theme.palette.divider}` }}>
-                <ShowChartIcon color="secondary" sx={{ fontSize: 36, mb: 1 }} />
-                <Typography variant="h6">{formatCurrency(results.effectiveDeduction)}</Typography>
-                <Typography variant="body2" color="textSecondary">적용 소득 공제액</Typography>
-                {results.limitApplied && <Typography variant="caption" color="warning.main" sx={{ display: 'block' }}>(한도 적용됨)</Typography>}
-            </Paper>
-
-            {/* Item 3 */}
-            <Paper elevation={0} sx={{ p: 2, textAlign: 'center', border: `1px solid ${theme.palette.divider}` }}>
-                <AttachMoneyIcon sx={{ fontSize: 36, mb: 1, color: theme.palette.info.main }} />
-                <Typography variant="h6">{formatPercent(results.savingsPerInvestment)}</Typography>
-                <Typography variant="body2" color="textSecondary">투자 대비 절세율</Typography>
-            </Paper>
-        </Stack>
+        <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+        >
+            <Grid container spacing={2}>
+                <Grid item xs={12} sm={4} component={motion.div} variants={itemVariants}>
+                    <Card elevation={2} sx={{ p: 2, textAlign: 'center', height: '100%' }}>
+                        <SavingsIcon color="primary" sx={{ fontSize: 36, mb: 1 }} />
+                        <Typography variant="h6" color="primary">
+                            <AnimatedNumber value={results.taxSavings} formatter={formatCurrency} />
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary">총 예상 절감 세액</Typography>
+                    </Card>
+                </Grid>
+                <Grid item xs={12} sm={4} component={motion.div} variants={itemVariants}>
+                    <Card elevation={2} sx={{ p: 2, textAlign: 'center', height: '100%' }}>
+                        <ShowChartIcon color="secondary" sx={{ fontSize: 36, mb: 1 }} />
+                        <Typography variant="h6">
+                            <AnimatedNumber value={results.effectiveDeduction} formatter={formatCurrency} />
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary">적용 소득 공제액</Typography>
+                        {results.limitApplied && <Typography variant="caption" color="warning.main" sx={{ display: 'block' }}>(소득 50% 한도 적용됨)</Typography>}
+                    </Card>
+                </Grid>
+                <Grid item xs={12} sm={4} component={motion.div} variants={itemVariants}>
+                    <Card elevation={2} sx={{ p: 2, textAlign: 'center', height: '100%' }}>
+                        <AttachMoneyIcon sx={{ fontSize: 36, mb: 1, color: theme.palette.info.main }} />
+                        <Typography variant="h6">
+                            <AnimatedNumber value={results.savingsPerInvestment} formatter={formatPercent} />
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary">투자 대비 절세율</Typography>
+                    </Card>
+                </Grid>
+            </Grid>
+        </motion.div>
     );
 };
 
