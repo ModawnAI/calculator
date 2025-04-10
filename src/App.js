@@ -25,26 +25,48 @@ import { KeyMetrics, DetailedTable, BarChartCard, PieChartCard } from './Results
 import { formatCurrency, formatPercent } from './utils'; // Import helpers
 
 // Register Chart.js components (including ArcElement)
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement); // Re-enable registration
 
-// --- Corrected Tax Brackets based on PDF ---
+// --- Updated Tax Brackets from Image (using Progressive Deduction) ---
+// Structure: { limit: upper limit of bracket, rate: applicable rate, deduction: progressive deduction amount }
 const TAX_BRACKETS = [
-    { limit: 12000000, rate: 0.066 }, { limit: 46000000, rate: 0.165 }, { limit: 88000000, rate: 0.264 }, { limit: 150000000, rate: 0.385 }, { limit: 300000000, rate: 0.418 }, { limit: 500000000, rate: 0.44 }, { limit: 1000000000, rate: 0.462 }, { limit: Infinity, rate: 0.495 },
+    { limit: 14000000, rate: 0.06, deduction: 0 },
+    { limit: 50000000, rate: 0.15, deduction: 1260000 },
+    { limit: 88000000, rate: 0.24, deduction: 5760000 },
+    { limit: 150000000, rate: 0.35, deduction: 15440000 },
+    { limit: 300000000, rate: 0.38, deduction: 19940000 },
+    { limit: 500000000, rate: 0.40, deduction: 25940000 },
+    { limit: 1000000000, rate: 0.42, deduction: 35940000 },
+    { limit: Infinity, rate: 0.45, deduction: 65940000 },
 ];
 
 // --- Tax Calculation Logic ---
-const estimateTax = (taxBase) => { /* ... same as before ... */
-    if (taxBase <= 0) return 0; let totalTax = 0; let previousLimit = 0;
+// Updated estimateTax function using progressive deduction
+const estimateTax = (taxBase) => {
+    if (taxBase <= 0) return 0;
+
     for (const bracket of TAX_BRACKETS) {
-        if (taxBase > previousLimit) { const taxableAmountInBracket = Math.min(taxBase - previousLimit, bracket.limit - previousLimit); totalTax += taxableAmountInBracket * bracket.rate; } else { break; }
-        if (taxBase <= bracket.limit) { break; } previousLimit = bracket.limit;
-    } return Math.round(totalTax);
+        if (taxBase <= bracket.limit) {
+            const calculatedTax = (taxBase * bracket.rate) - bracket.deduction;
+            return Math.round(calculatedTax);
+        }
+    }
+    // Should not be reached if Infinity is the last limit, but as a fallback:
+    const lastBracket = TAX_BRACKETS[TAX_BRACKETS.length - 1];
+    const calculatedTax = (taxBase * lastBracket.rate) - lastBracket.deduction;
+    return Math.round(calculatedTax);
 };
 
+// Update getMarginalRate to use the new bracket limits/rates
 const getMarginalRate = (taxBase) => {
-    if (taxBase <= 0) return 0; let rate = 0; let previousLimit = 0;
-    for (const bracket of TAX_BRACKETS) { if (taxBase > previousLimit) { rate = bracket.rate; } else { break; } if (taxBase <= bracket.limit) { break; } previousLimit = bracket.limit; }
-    return rate;
+    if (taxBase <= 0) return 0;
+    for (const bracket of TAX_BRACKETS) {
+        if (taxBase <= bracket.limit) {
+            return bracket.rate;
+        }
+    }
+    // Fallback for the highest bracket
+    return TAX_BRACKETS[TAX_BRACKETS.length - 1].rate;
 };
 
 const calculateVentureDeduction = (investmentAmount, investmentType, comprehensiveIncome) => { /* ... same as before, returns { effectiveDeduction, limitApplied, breakdown } ... */
