@@ -1,38 +1,18 @@
-.App {
-  text-align: center;
+/* src/App.css */
+
+body {
+  margin: 0; /* Usually handled by CssBaseline */
+  /* Font family is set in MUI ThemeProvider */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Background color is usually handled by CssBaseline based on theme */
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
+/* You generally won't need specific component styles here
+   as they are handled by MUI and the 'sx' prop */
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
+/* Example: If you had a non-MUI element you wanted to style globally */
+/* .my-custom-non-mui-class {
+  padding: 1rem;
+  border: 1px solid blue;
+} */
