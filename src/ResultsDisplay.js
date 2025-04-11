@@ -21,8 +21,8 @@ import { formatCurrency, formatPercent } from './utils';
 import { AnimatedNumber } from './AnimatedNumber';
 
 // --- Key Metrics Component ---
-// FIXED: Added theme prop
-export const KeyMetrics = ({ results, theme }) => {
+export const KeyMetrics = ({ results }) => {
+    const theme = useTheme();
      if (!results) return null;
      const containerVariants = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.1 } } };
      const itemVariants = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } };
@@ -56,7 +56,6 @@ export const KeyMetrics = ({ results, theme }) => {
                 </Card>
                 {/* Card 3 - Savings Rate */}
                  <Card elevation={2} sx={{ p: 2, textAlign: 'center', flex: 1 }} component={motion.div} variants={itemVariants}>
-                     {/* FIXED: Using theme prop */}
                     <PercentIcon sx={{ fontSize: 36, mb: 1, color: theme.palette.info.main }} />
                     <Typography variant="h6">
                         <AnimatedNumber value={results.savingsPerInvestment} formatter={(val) => formatPercent(val, 1)} />
@@ -69,8 +68,8 @@ export const KeyMetrics = ({ results, theme }) => {
 };
 
 // --- Detailed Table Component ---
-// FIXED: Added theme prop
-export const DetailedTable = ({ results, theme }) => {
+export const DetailedTable = ({ results }) => {
+    const theme = useTheme();
     if (!results) return null;
      return (
         <Card elevation={2} sx={{ height: '100%' }}>
@@ -87,7 +86,6 @@ export const DetailedTable = ({ results, theme }) => {
                              <TableRow><TableCell>유효세율 (공제 후)</TableCell><TableCell align="right">{formatPercent(results.effectiveRateAfter)}</TableCell></TableRow>
                              <TableRow><TableCell>공제 전 예상 세금</TableCell><TableCell align="right">{formatCurrency(results.estimatedTaxBefore)}</TableCell></TableRow>
                              <TableRow><TableCell>공제 후 예상 세금</TableCell><TableCell align="right">{formatCurrency(results.estimatedTaxAfter)}</TableCell></TableRow>
-                             {/* FIXED: Using theme prop */}
                              <TableRow sx={{ backgroundColor: theme.palette.action.hover }}><TableCell colSpan={2} sx={{ fontWeight: 'bold', color: 'text.secondary', py: 0.5 }}>소득공제 계산</TableCell></TableRow>
                              <TableRow><TableCell>• 계산된 공제액</TableCell><TableCell align="right">{formatCurrency(results.breakdown.totalCalculated)}</TableCell></TableRow>
                              {results.investmentType === 'direct_angel_crowd' && (<>
