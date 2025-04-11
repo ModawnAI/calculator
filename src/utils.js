@@ -2,22 +2,40 @@
 
 /**
  * Formats a number as Korean Won currency.
+ * Includes fallback for invalid input.
  * @param {number | string | null | undefined} value - The value to format.
- * @param {string} [fallback='₩0'] - The fallback string if value is invalid.
- * @returns {string} Formatted currency string.
+ * @param {string} [currencySymbol='₩'] - Currency symbol to use.
+ * @param {number} [fractionDigits=0] - Number of digits after the decimal point.
+ * @returns {string} Formatted currency string (e.g., "₩1,000,000").
  */
-export const formatCurrency = (value, fallback = '₩0') => {
-    if (value === null || value === undefined || isNaN(Number(value))) return fallback;
-    return new Intl.NumberFormat('ko-KR', { style: 'currency', currency: 'KRW' }).format(Number(value));
+export const formatCurrency = (value, currencySymbol = '₩', fractionDigits = 0) => {
+    const number = Number(value);
+    // Return empty string or placeholder if value is not a valid number
+    if (value === null || value === undefined || isNaN(number)) return `${currencySymbol}0`; // Or return '' depending on desired fallback
+
+    return new Intl.NumberFormat('ko-KR', {
+        // style: 'currency', // Style 'currency' forces the KRW symbol, we handle it manually
+        // currency: 'KRW',
+        minimumFractionDigits: fractionDigits,
+        maximumFractionDigits: fractionDigits,
+    }).format(number) + (currencySymbol === '₩' ? '원' : currencySymbol); // Append '원' if using default symbol
 };
 
 /**
- * Formats a number as a percentage with one decimal place.
+ * Formats a number as a percentage string.
+ * Includes fallback for invalid input.
  * @param {number | string | null | undefined} value - The value to format (e.g., 0.123 for 12.3%).
- * @param {string} [fallback='0.0%'] - The fallback string if value is invalid.
- * @returns {string} Formatted percentage string.
+ * @param {number} [fractionDigits=1] - Number of digits after the decimal point.
+ * @returns {string} Formatted percentage string (e.g., "12.3%").
  */
-export const formatPercent = (value, fallback = '0.0%') => {
-    if (value === null || value === undefined || isNaN(Number(value))) return fallback;
-    return new Intl.NumberFormat('ko-KR', { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(Number(value));
+export const formatPercent = (value, fractionDigits = 1) => {
+    const number = Number(value);
+    // Return empty string or placeholder if value is not a valid number
+    if (value === null || value === undefined || isNaN(number)) return `0.${'0'.repeat(fractionDigits)}%`; // Or return ''
+
+    return new Intl.NumberFormat('ko-KR', {
+        style: 'percent',
+        minimumFractionDigits: fractionDigits,
+        maximumFractionDigits: fractionDigits,
+    }).format(number);
 };
